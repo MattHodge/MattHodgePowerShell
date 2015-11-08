@@ -1,0 +1,26 @@
+{
+  "chef":{
+    "chef_server_url":"https://your.chef.server.com:443/organizations/your_org",
+    "validation_client_name":"chef-validator",
+    "validation_key_path":"~/.chef/chef-validator.pem",
+    "client_key":"~/.chef/your_user.pem",
+    "node_name":"your_user"
+  },
+  "cookbook":{
+    "copyright":"Your Company",
+    "email":"your@email.com",
+    "license":"reserved"
+  },
+  "allowed_licenses":[],
+  "raise_license_exception":false,
+  "vagrant":{
+    "vm":{
+      "box":"kensykora/windows_2012_r2_standard",
+      "forward_port":{},
+      "provision":"chef_solo"
+    }
+  },
+  "ssl":{
+    "verify":true
+  }
+}
