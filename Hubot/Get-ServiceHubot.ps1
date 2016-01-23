@@ -21,7 +21,7 @@ function Get-ServiceHubot
     try
     {
         $service = Get-Service -Name $Name -ErrorAction Stop
-        $result.output = "Service $($service.Name) (*$($service.DisplayName)*) is currently ``$($service.Status.ToString())``."
+        $result.output = "Service $($service.Name) (*$($service.DisplayName)*) is currently $($service.Status.ToString())."
         $result.success = $true
     }
     catch
