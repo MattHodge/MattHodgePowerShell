@@ -17,6 +17,42 @@ if (Test-Path -Path 'D:\ProjectsGit')
     Set-Location -Path "D:\ProjectsGit"
 }
 
+
+<#
+.Synopsis
+   Adds an Environment Variable to the system
+.EXAMPLE
+   Add-EnvironmentVariable -Variable "GOPATH" -Value F:\ProjectsGit\gotesting\
+.EXAMPLE
+   Add-EnvironmentVariable -Variable "GOROOT" -Value 'C:\tools\go'
+#>
+function Add-EnvironmentVariable
+{
+    [CmdletBinding()]
+    Param
+    (
+        # The environment variable to add
+        [Parameter(Mandatory=$true)]
+        [string]
+        $Variable,
+
+        # The value of the environment variable
+        [Parameter(Mandatory=$true)]
+        [string]
+        $Value
+    )
+
+    try
+    {
+        [Environment]::SetEnvironmentVariable($Variable, $Value, [EnvironmentVariableTarget]::User)
+        Write-Output "$($Variable) with value $($Value) added to environment variables"
+    }
+    catch
+    {
+        Write-Error $_
+    }
+}
+
 ##########################
 # Reload Path Variables
 ##########################
