@@ -247,3 +247,17 @@ function prompt
     Write-Host "`n>" -ForegroundColor DarkGray -NoNewline
     return " "
 }
+
+##########################
+# Run pester tests in a background job
+##########################
+
+function Invoke-PesterJob
+{
+    # Param block copied from Invoke-Pester
+
+    $params = $PSBoundParameters
+    
+    Start-Job -ScriptBlock { Set-Location $using:pwd; Invoke-Pester @using:params } |
+    Receive-Job -Wait -AutoRemoveJob
+}
