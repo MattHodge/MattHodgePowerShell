@@ -254,10 +254,73 @@ function prompt
 
 function Invoke-PesterJob
 {
-    # Param block copied from Invoke-Pester
+    [CmdletBinding(DefaultParameterSetName = 'LegacyOutputXml')]
+    param(
+        [Parameter(Position=0,Mandatory=0)]
+        [Alias('Path', 'relative_path')]
+        [object[]]$Script = '.',
+
+        [Parameter(Position=1,Mandatory=0)]
+        [Alias("Name")]
+        [string[]]$TestName,
+
+        [Parameter(Position=2,Mandatory=0)]
+        [switch]$EnableExit,
+
+        [Parameter(Position=3,Mandatory=0, ParameterSetName = 'LegacyOutputXml')]
+        [string]$OutputXml,
+
+        [Parameter(Position=4,Mandatory=0)]
+        [Alias('Tags')]
+        [string[]]$Tag,
+
+        [string[]]$ExcludeTag,
+
+        [switch]$PassThru,
+
+        [object[]] $CodeCoverage = @(),
+
+        [Switch]$Strict,
+
+        [Parameter(Mandatory = $true, ParameterSetName = 'NewOutputSet')]
+        [string] $OutputFile,
+
+        [Parameter(ParameterSetName = 'NewOutputSet')]
+        [ValidateSet('LegacyNUnitXml', 'NUnitXml')]
+        [string] $OutputFormat = 'NUnitXml',
+
+        [Switch]$Quiet,
+
+        [object]$PesterOption
+    )
 
     $params = $PSBoundParameters
     
     Start-Job -ScriptBlock { Set-Location $using:pwd; Invoke-Pester @using:params } |
     Receive-Job -Wait -AutoRemoveJob
+}
+
+function ConvertFrom-PesterOutputObject {
+  param (
+    [parameter(ValueFromPipeline=$true)]
+    [object]
+    $InputObject
+  )
+  begin {
+    $PesterModule = Import-Module Pester -Passthru
+  }
+  process {
+    $DescribeGroup = $InputObject.testresult | Group-Object Describe
+    foreach ($DescribeBlock in $DescribeGroup) {
+      $PesterModule.Invoke({Write-Screen $args[0]}, "Describing $($DescribeBlock.Name)")
+      $ContextGroup = $DescribeBlock.group | Group-Object Context
+      foreach ($ContextBlock in $ContextGroup) {
+        $PesterModule.Invoke({Write-Screen $args[0]}, "`tContext $($subheader.name)")
+        foreach ($TestResult in $ContextBlock.group) {
+          $PesterModule.Invoke({Write-PesterResult $args[0]}, $TestResult)
+        }
+      }
+    }
+    $PesterModule.Invoke({Write-PesterReport $args[0]}, $InputObject)
+  }
 }
