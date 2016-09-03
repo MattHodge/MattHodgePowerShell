@@ -6,7 +6,7 @@
 .DESCRIPTION
    Creates a credential .xml file exported from Export-Clixml from the SYSTEM account. This is useful when running scripts or services under the SYSTEM account that requires credentials.
 .EXAMPLE
-   $cred = Get-Credential 
+   $cred = Get-Credential
    Export-SystemAccountCredential -Credential $cred -Path 'C:\mycreds' -Verbose
 #>
 function Export-SystemAccountCredential
@@ -24,6 +24,11 @@ function Export-SystemAccountCredential
         $Path
     )
 
+    if (!(Test-Path -Path $Path))
+    {
+      New-Item -Path $Path -Type Directory -Force
+    }
+
     $schTaskName = 'CreateCredential'
     $scriptName = "$($schTaskName).ps1"
 
@@ -39,7 +44,7 @@ function Export-SystemAccountCredential
         $npipeclient.connect()
         $pipeWriter = new-object System.IO.StreamWriter($npipeClient)
         $pipeWriter.AutoFlush = $true
-        
+
         # convert to creds block
         $pw = $Password | ConvertTo-SecureString -AsPlainText -Force
         $credential = New-Object System.Management.Automation.PSCredential($Username,$pw)
@@ -53,7 +58,7 @@ function Export-SystemAccountCredential
     }.GetNewClosure()
 
     Write-Verbose "Creating Script File"
-    $scriptPath = Join-Path $env:TEMP $scriptName 
+    $scriptPath = Join-Path $env:TEMP $scriptName
     Set-Content -Path $scriptPath -Value $schTaskScript -Force
 
     Write-Verbose "Creating Scheduled Task"
