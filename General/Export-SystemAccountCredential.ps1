@@ -40,6 +40,7 @@ function Export-SystemAccountCredential
             $Password,
             $Path
         )
+        $Username = "\$Username"
         $npipeClient = new-object System.IO.Pipes.NamedPipeClientStream($env:ComputerName, 'task', [System.IO.Pipes.PipeDirection]::Out)
         $npipeclient.connect()
         $pipeWriter = new-object System.IO.StreamWriter($npipeClient)
